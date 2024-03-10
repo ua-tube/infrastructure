@@ -1,0 +1,50 @@
+version: '3.7'
+services:
+  postgres:
+    container_name: ${DOCKER_REGISTRY-}postgres
+    image: postgres:alpine
+
+  pgadmin:
+    container_name: ${DOCKER_REGISTRY-}pgadmin
+    image: dpage/pgadmin4
+
+  rabbitmq:
+    container_name: ${DOCKER_REGISTRY-}rabbitmq
+    image: rabbitmq:management-alpine
+
+  mongo:
+    container_name: ${DOCKER_REGISTRY-}mongo
+    image: mongo:latest
+
+  elasticsearch:
+    container_name: ${DOCKER_REGISTRY-}elasticsearch
+    build:
+      context: .
+      dockerfile: ./docker/elasticsearch/Dockerfile
+
+  kibana:
+    container_name: ${DOCKER_REGISTRY-}kibana
+    image: docker.elastic.co/kibana/kibana:7.11.0
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.11.0
+
+  redis:
+    container_name: ${DOCKER_REGISTRY-}redis
+    image: redis:alpine
+
+  redis-commander:
+    container_name: ${DOCKER_REGISTRY-}redis-commander
+    image: rediscommander/redis-commander:latest
+    depends_on:
+      - redis
+
+volumes:
+  pg-data:
+  pgadmin-data:
+  rabbitmq-data:
+  mongo-data:
+  es-data:
+  kibana-data:
+  redis-data:
+  storage-data:
