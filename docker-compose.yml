@@ -2,68 +2,68 @@ version: '3.7'
 services:
   postgres:
     container_name: ${DOCKER_REGISTRY-}postgres
-    image: postgres:alpine
+    image: postgres:16.2-alpine
     restart: always
-    volumes:
-      - pg-data:/var/data
     ports:
-      - 5432:5432
+      - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DATA: /var/data
+    volumes:
+      - pg-data:/var/data
 
   pgadmin:
     container_name: ${DOCKER_REGISTRY-}pgadmin
     image: dpage/pgadmin4
     restart: always
     ports:
-      - 5050:80
-    volumes:
-      - pgadmin-data:/root/.pgadmin
+      - '5050:80'
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-data:/root/.pgadmin
 
   rabbitmq:
     container_name: ${DOCKER_REGISTRY-}rabbitmq
     image: rabbitmq:3.13.0-management-alpine
     restart: always
     ports:
-      - 5672:5672
-      - 15672:15672
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - '5672:5672'
+      - '15672:15672'
     environment:
       RABBITMQ_DEFAULT_USER: root
       RABBITMQ_DEFAULT_PASS: root
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
 
   mongo:
     container_name: ${DOCKER_REGISTRY-}mongo
-    image: mongo:latest
+    image: mongo:7.0.9
     restart: always
     ports:
-      - 27017:27017
-    volumes:
-      - mongo-data:/data/db
+      - '27017:27017'
     healthcheck:
       test: [ 'CMD', 'mongosh', '--eval', 'rs.initiate()' ]
       interval: 10s
+    volumes:
+      - mongo-data:/data/db
 
   elasticsearch:
     container_name: ${DOCKER_REGISTRY-}elasticsearch
     build:
       context: .
       dockerfile: ./docker/elasticsearch/Dockerfile
+    restart: always
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xmx2g
     ports:
-      - 9200:9200
+      - '9200:9200'
     volumes:
       - es-data:/usr/share/elasticsearch/data
-    restart: always
 
   kibana:
     container_name: ${DOCKER_REGISTRY-}kibana
@@ -75,7 +75,7 @@ services:
     depends_on:
       - elasticsearch
     ports:
-      - 5601:5601
+      - '5601:5601'
     volumes:
       - kibana-data:/usr/share/kibana/data
 
@@ -85,20 +85,20 @@ services:
     restart: always
     environment:
       - ES_JAVA_OPTS=-Xmx1g
+    ports:
+      - '9600:9600'
+      - '9250:9250'
     volumes:
       - ./docker/logstash/pipeline:/usr/share/logstash/pipeline:ro,z
     depends_on:
       - elasticsearch
-    ports:
-      - 9600:9600
-      - 9250:9250
 
   redis:
     container_name: ${DOCKER_REGISTRY-}redis
-    image: redis:alpine
+    image: redis:6.2.14-alpine
     restart: always
     ports:
-      - 6379:6379
+      - '6379:6379'
     command: [ 'redis-server', '--appendonly', 'yes' ]
     volumes:
       - redis-data:/data
