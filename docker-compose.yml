@@ -1,5 +1,131 @@
 version: '3.7'
 services:
+  # ---- APPS SECTION ---- #
+  api-gateway:
+    container_name: ${DOCKER_REGISTRY-}api-gateway
+    image: ghcr.io/ua-tube/api-gateway:latest
+    restart: always
+    ports:
+      - '8000:8000'
+    environment:
+      COMMUNITY_SVC_ORIGIN: http://community-svc:15500
+      HISTORY_SVC_ORIGIN: http://history-svc:15900
+      LIBRARY_SVC_ORIGIN: http://library-svc:15600
+      SEARCH_SVC_ORIGIN: http://search-svc:15700
+      SUBSCRIPTIONS_SVC_ORIGIN: http://subscriptions-svc:15800
+      USERS_SVC_ORIGIN: http://users-svc:15400
+      VIDEO_MANAGER_SVC_ORIGIN: http://video-manager-svc:15000
+      VIDEO_PROCESSOR_SVC_ORIGIN: http://video-processor-svc:11000
+      VIDEO_STORE_SVC_ORIGIN: http://video-store-svc:15300
+    networks:
+      - api-gateway
+      - community-svc
+      - subscriptions-svc
+      - users-svc
+      # - video-manager-svc
+      # - video-processor-svc
+      # - video-store-svc
+      # - history-svc
+      # - search-svc
+
+  auth-svc:
+    container_name: ${DOCKER_REGISTRY-}auth-svc
+    image: ghcr.io/ua-tube/auth:latest
+    restart: always
+    ports:
+      - '9000:9000'
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/auth_db?schema=public
+    networks:
+      - auth-svc
+      - storage-svc
+      - users-svc
+      - subscriptions-svc
+      - postgres
+
+  community-svc:
+    container_name: ${DOCKER_REGISTRY-}community-svc
+    image: ghcr.io/ua-tube/community:latest
+    restart: always
+    ports:
+      - '15500:15500'
+    environment:
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/subscriptions_db?schema=public
+    networks:
+      - api-gateway
+      - community-svc
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
+
+  # history-svc:
+  #   container_name: ${DOCKER_REGISTRY-}history-svc
+
+  # library-svc:
+  #   container_name: ${DOCKER_REGISTRY-}library-svc
+
+  # search-svc:
+  #   container_name: ${DOCKER_REGISTRY-}search-svc
+
+  storage-svc:
+    container_name: ${DOCKER_REGISTRY-}storage-svc
+    image: ghcr.io/ua-tube/storage:latest
+    restart: always
+    ports:
+      - '10000:10000'
+    environment:
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/storage_db?schema=public
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+    volumes:
+      - storage-data:/app
+    networks:
+      - storage-svc
+      - auth-svc
+      - postgres
+      - rabbitmq
+
+  subscriptions-svc:
+    container_name: ${DOCKER_REGISTRY-}subscriptions-svc
+    image: ghcr.io/ua-tube/subscriptions:latest
+    restart: always
+    ports:
+      - '15800:15800'
+    environment:
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/subscriptions_db?schema=public
+    networks:
+      - api-gateway
+      - subscriptions-svc
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
+
+  users-svc:
+    container_name: ${DOCKER_REGISTRY-}users-svc
+    image: ghcr.io/ua-tube/users:latest
+    restart: always
+    ports:
+      - '15400:15400'
+    environment:
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/users_db?schema=public
+    networks:
+      - api-gateway
+      - users-svc
+      - auth-svc
+      - rabbitmq
+      - postgres
+
+  # ---- SERVICES SECTION ---- #
   postgres:
     container_name: ${DOCKER_REGISTRY-}postgres
     image: postgres:16.2-alpine
@@ -12,6 +138,12 @@ services:
       POSTGRES_DATA: /var/data
     volumes:
       - pg-data:/var/data
+    networks:
+      - postgres
+      - auth-svc
+      - storage-svc
+      - subscriptions-svc
+      - users-svc
 
   pgadmin:
     container_name: ${DOCKER_REGISTRY-}pgadmin
@@ -24,6 +156,8 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     volumes:
       - pgadmin-data:/root/.pgadmin
+    networks:
+      - postgres
 
   rabbitmq:
     container_name: ${DOCKER_REGISTRY-}rabbitmq
@@ -37,6 +171,11 @@ services:
       RABBITMQ_DEFAULT_PASS: root
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - rabbitmq
+      - storage-svc
+      - subscriptions-svc
+      - users-svc
 
   mongo:
     container_name: ${DOCKER_REGISTRY-}mongo
@@ -49,49 +188,27 @@ services:
       interval: 10s
     volumes:
       - mongo-data:/data/db
+    networks:
+      - mongo
 
-  elasticsearch:
-    container_name: ${DOCKER_REGISTRY-}elasticsearch
-    build:
-      context: .
-      dockerfile: ./docker/elasticsearch/Dockerfile
+  meilisearch:
+    container_name: ${DOCKER_REGISTRY-}meilisearch
+    image: getmeili/meilisearch:v1.8
     restart: always
     environment:
-      - xpack.security.enabled=false
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xmx2g
+      - http_proxy
+      - https_proxy
+      - MEILI_MASTER_KEY=UaTubeMaster
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_ENV=development
+      - MEILI_LOG_LEVEL
+      - MEILI_DB_PATH=/data.ms
     ports:
-      - '9200:9200'
+      - '7700:7700'
     volumes:
-      - es-data:/usr/share/elasticsearch/data
-
-  kibana:
-    container_name: ${DOCKER_REGISTRY-}kibana
-    image: docker.elastic.co/kibana/kibana:7.11.0
-    restart: always
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - ES_JAVA_OPTS=-Xmx512m
-    depends_on:
-      - elasticsearch
-    ports:
-      - '5601:5601'
-    volumes:
-      - kibana-data:/usr/share/kibana/data
-
-  logstash:
-    container_name: ${DOCKER_REGISTRY-}logstash
-    image: docker.elastic.co/logstash/logstash:7.11.0
-    restart: always
-    environment:
-      - ES_JAVA_OPTS=-Xmx1g
-    ports:
-      - '9600:9600'
-      - '9250:9250'
-    volumes:
-      - ./docker/logstash/pipeline:/usr/share/logstash/pipeline:ro,z
-    depends_on:
-      - elasticsearch
+      - 'meilisearch-data:/data.ms'
+    networks:
+      - meilisearch
 
   redis:
     container_name: ${DOCKER_REGISTRY-}redis
@@ -102,13 +219,54 @@ services:
     command: [ 'redis-server', '--appendonly', 'yes' ]
     volumes:
       - redis-data:/data
+    networks:
+      - redis
+      - subscriptions-svc
+      - video-processor-svc
 
+# --- VOLUMES ---- #
 volumes:
   pg-data:
   pgadmin-data:
   rabbitmq-data:
   mongo-data:
-  es-data:
-  kibana-data:
+  meilisearch-data:
   redis-data:
   storage-data:
+
+# ---- NETWORKS ---- #
+networks:
+  api-gateway:
+    driver: bridge
+  auth-svc:
+    driver: bridge
+  community-svc:
+    driver: bridge
+  history-svc:
+    driver: bridge
+  library-svc:
+    driver: bridge
+  search-svc:
+    driver: bridge
+  storage-svc:
+    driver: bridge
+  subscriptions-svc:
+    driver: bridge
+  users-svc:
+    driver: bridge
+  video-manager-svc:
+    driver: bridge
+  video-processor-svc:
+    driver: bridge
+  video-store-svc:
+    driver: bridge
+  postgres:
+    driver: bridge
+  mongo:
+    driver: bridge
+  meilisearch:
+    driver: bridge
+  rabbitmq:
+    driver: bridge
+  redis:
+    driver: bridge
