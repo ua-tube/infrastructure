@@ -43,12 +43,28 @@ services:
       - subscriptions-svc
       - postgres
 
+  storage-svc:
+    container_name: ${DOCKER_REGISTRY-}storage-svc
+    image: ghcr.io/ua-tube/storage:latest
+    restart: always
+    ports:
+      - '10000:10000'
+    environment:
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/storage_db?schema=public
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+    volumes:
+      - storage:/app
+    networks:
+      - storage-svc
+      - auth-svc
+      - postgres
+      - rabbitmq
+
   community-svc:
     container_name: ${DOCKER_REGISTRY-}community-svc
     image: ghcr.io/ua-tube/community:latest
     restart: always
-    ports:
-      - '15500:15500'
     environment:
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
       REDIS_URL: redis://redis:6379
@@ -71,30 +87,10 @@ services:
   # search-svc:
   #   container_name: ${DOCKER_REGISTRY-}search-svc
 
-  storage-svc:
-    container_name: ${DOCKER_REGISTRY-}storage-svc
-    image: ghcr.io/ua-tube/storage:latest
-    restart: always
-    ports:
-      - '10000:10000'
-    environment:
-      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/storage_db?schema=public
-      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
-    volumes:
-      - storage-data:/app
-    networks:
-      - storage-svc
-      - auth-svc
-      - postgres
-      - rabbitmq
-
   subscriptions-svc:
     container_name: ${DOCKER_REGISTRY-}subscriptions-svc
     image: ghcr.io/ua-tube/subscriptions:latest
     restart: always
-    ports:
-      - '15800:15800'
     environment:
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
       REDIS_URL: redis://redis:6379
@@ -112,8 +108,6 @@ services:
     container_name: ${DOCKER_REGISTRY-}users-svc
     image: ghcr.io/ua-tube/users:latest
     restart: always
-    ports:
-      - '15400:15400'
     environment:
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
@@ -137,7 +131,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DATA: /var/data
     volumes:
-      - pg-data:/var/data
+      - postgres:/var/data
     networks:
       - postgres
       - auth-svc
@@ -155,7 +149,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
     volumes:
-      - pgadmin-data:/root/.pgadmin
+      - pgadmin:/root/.pgadmin
     networks:
       - postgres
 
@@ -170,7 +164,7 @@ services:
       RABBITMQ_DEFAULT_USER: root
       RABBITMQ_DEFAULT_PASS: root
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq:/var/lib/rabbitmq
     networks:
       - rabbitmq
       - storage-svc
@@ -187,7 +181,7 @@ services:
       test: [ 'CMD', 'mongosh', '--eval', 'rs.initiate()' ]
       interval: 10s
     volumes:
-      - mongo-data:/data/db
+      - mongo:/data/db
     networks:
       - mongo
 
@@ -206,7 +200,7 @@ services:
     ports:
       - '7700:7700'
     volumes:
-      - 'meilisearch-data:/data.ms'
+      - 'meilisearch:/data.ms'
     networks:
       - meilisearch
 
@@ -218,7 +212,7 @@ services:
       - '6379:6379'
     command: [ 'redis-server', '--appendonly', 'yes' ]
     volumes:
-      - redis-data:/data
+      - redis:/data
     networks:
       - redis
       - subscriptions-svc
@@ -226,13 +220,13 @@ services:
 
 # --- VOLUMES ---- #
 volumes:
-  pg-data:
-  pgadmin-data:
-  rabbitmq-data:
-  mongo-data:
-  meilisearch-data:
-  redis-data:
-  storage-data:
+  postgres:
+  pgadmin:
+  rabbitmq:
+  mongo:
+  meilisearch:
+  redis:
+  storage:
 
 # ---- NETWORKS ---- #
 networks:
