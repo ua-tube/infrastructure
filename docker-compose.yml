@@ -7,6 +7,9 @@ services:
     build:
       context: ../api-gateway
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     ports:
       - '8000:8000'
@@ -22,6 +25,15 @@ services:
       USERS_SVC_ORIGIN: http://users-svc:15400
       VIDEO_MANAGER_SVC_ORIGIN: http://video-manager-svc:15000
       VIDEO_STORE_SVC_ORIGIN: http://video-store-svc:15300
+    depends_on:
+      - community-svc
+      - history-svc
+      - library-svc
+      - search-svc
+      - subscriptions-svc
+      - users-svc
+      - video-manager-svc
+      - video-store-svc
     networks:
       - api-gateway
       - community-svc
@@ -40,6 +52,9 @@ services:
     build:
       context: ../auth
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     ports:
       - '9000:9000'
@@ -52,6 +67,8 @@ services:
       JWT_ISSUER: UaTube.Auth
       JWT_AUDIENCE: UaTube.Resource
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/auth_db?schema=public
+    depends_on:
+      - postgres
     networks:
       - auth-svc
       - storage-svc
@@ -68,6 +85,9 @@ services:
     build:
       context: ../community
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
@@ -77,6 +97,11 @@ services:
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
       RABBITMQ_QUEUE: community
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/community_db?schema=public
+    depends_on:
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
     networks:
       - community-svc
       - api-gateway
@@ -91,6 +116,9 @@ services:
     build:
       context: ../history
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
@@ -102,6 +130,12 @@ services:
       MEILISEARCH_URL: http://meilisearch:7700
       MEILISEARCH_MASTERKEY: UaTubeMaster
       DATABASE_URL: mongodb://mongo:27017/history
+    depends_on:
+      - auth-svc
+      - redis
+      - postgres
+      - meilisearch
+      - rabbitmq
     networks:
       - history-svc
       - api-gateway
@@ -117,6 +151,9 @@ services:
     build:
       context: ../library
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
@@ -126,6 +163,11 @@ services:
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
       RABBITMQ_QUEUE: library
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/library_db?schema=public
+    depends_on:
+      - auth-svc
+      - rabbitmq
+      - redis
+      - postgres
     networks:
       - library-svc
       - api-gateway
@@ -140,6 +182,9 @@ services:
     build:
       context: ../search
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
@@ -148,6 +193,9 @@ services:
       RABBITMQ_QUEUE: history
       MEILISEARCH_URL: http://meilisearch:7700
       MEILISEARCH_MASTERKEY: UaTubeMaster      
+    depends_on:
+      - rabbitmq
+      - meilisearch
     networks:
       - search-svc
       - api-gateway
@@ -160,6 +208,9 @@ services:
     build:
       context: ../storage
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     ports:
       - '10000:10000'
@@ -177,8 +228,12 @@ services:
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
       RABBITMQ_VIDEO_PROCESSOR_QUEUE: video-processor
       RABBITMQ_VIDEO_MANAGER_QUEUE: video-manager
+    depends_on:
+      - auth-svc
+      - postgres
+      - rabbitmq
     volumes:
-      - storage:/app
+      - storage:/app/public
     networks:
       - storage-svc
       - auth-svc
@@ -192,6 +247,9 @@ services:
     build:
       context: ../subscriptions
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
@@ -201,6 +259,11 @@ services:
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
       RABBITMQ_QUEUE: subscriptions
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/subscriptions_db?schema=public 
+    depends_on:
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
     networks:
       - subscriptions-svc
       - api-gateway
@@ -215,6 +278,9 @@ services:
     build:
       context: ../users
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
@@ -233,6 +299,10 @@ services:
       RABBITMQ_HISTORY_QUEUE: history
       RABBITMQ_SEARCH_QUEUE: search
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/users_db?schema=public
+    depends_on:
+      - auth-svc
+      - rabbitmq
+      - postgres
     networks:
       - users-svc
       - api-gateway
@@ -246,6 +316,9 @@ services:
     build:
       context: ../video-manager
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     environment:
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
@@ -264,6 +337,12 @@ services:
       JWT_ISSUER: UaTube.VideoManager
       JWT_AUDIENCE: UaTube.Resource
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/video_manager_db?schema=public
+    depends_on:
+      - auth-svc
+      - video-processor-svc
+      - redis
+      - rabbitmq
+      - postgres
     networks:
       - video-manager-svc
       - api-gateway
@@ -279,6 +358,9 @@ services:
     build:
       context: ../video-processor
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
@@ -293,8 +375,13 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/video_processor_db?schema=public
       HWACCEL_ENABLED: true
       GPU_VENDOR: nvidia
+    depends_on:
+      - redis
+      - rabbitmq
+      - storage-svc
+      - postgres
     volumes:
-      - video-processor:/app
+      - video-processor:/app/processor_output
     networks:
       - video-processor-svc
       - video-manager-svc
@@ -310,6 +397,9 @@ services:
     build:
       context: ../video-store
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
@@ -321,6 +411,11 @@ services:
       RABBITMQ_HISTORY_QUEUE: history
       RABBITMQ_VIDEO_MANAGER_QUEUE: video-manager
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/video_store_db?schema=public
+    depends_on:
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
     networks:
       - video-store-svc
       - api-gateway
@@ -336,6 +431,9 @@ services:
     build:
       context: ../web-status
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     restart: always
     ports:
       - '20000:20000'
@@ -354,6 +452,19 @@ services:
       VIDEO_MANAGER_SVC_ORIGIN: http://video-manager-svc:15000/api/v1/health
       VIDEO_PROCESSOR_SVC_ORIGIN: http://video-processor-svc:11000/api/v1/health
       VIDEO_STORE_SVC_ORIGIN: http://video-store-svc:15300/api/v1/health
+    depends_on:
+      - api-gateway
+      - auth-svc
+      - community-svc
+      - history-svc
+      - library-svc
+      - search-svc
+      - storage-svc
+      - subscriptions-svc
+      - users-svc
+      - video-manager-svc
+      - video-processor-svc
+      - video-store-svc
     networks:
       - web-status
       - api-gateway
@@ -374,8 +485,8 @@ services:
     container_name: ${DOCKER_REGISTRY-}postgres
     image: postgres:16.2-alpine
     restart: always
-    ports:
-      - '5432:5432'
+    #ports:
+    #  - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -412,9 +523,9 @@ services:
     container_name: ${DOCKER_REGISTRY-}rabbitmq
     image: rabbitmq:3.13.0-management-alpine
     restart: always
-    ports:
-      - '5672:5672'
-      - '15672:15672'
+    #ports:
+    #  - '5672:5672'
+    #  - '15672:15672'
     environment:
       RABBITMQ_DEFAULT_USER: root
       RABBITMQ_DEFAULT_PASS: root
@@ -437,8 +548,8 @@ services:
     container_name: ${DOCKER_REGISTRY-}mongo
     image: mongo:7.0.9
     restart: always
-    ports:
-      - '27017:27017'
+    #ports:
+    #  - '27017:27017'
     healthcheck:
       test: [ 'CMD', 'mongosh', '--eval', 'rs.initiate()' ]
       interval: 10s
@@ -452,6 +563,8 @@ services:
     container_name: ${DOCKER_REGISTRY-}meilisearch
     image: getmeili/meilisearch:v1.8
     restart: always
+    #ports:
+    #  - '7700:7700'
     environment:
       - http_proxy
       - https_proxy
@@ -460,8 +573,6 @@ services:
       - MEILI_ENV=development
       - MEILI_LOG_LEVEL
       - MEILI_DB_PATH=/data.ms
-    ports:
-      - '7700:7700'
     volumes:
       - 'meilisearch:/data.ms'
     networks:
@@ -473,8 +584,8 @@ services:
     container_name: ${DOCKER_REGISTRY-}redis
     image: redis:6.2.14-alpine
     restart: always
-    ports:
-      - '6379:6379'
+    #ports:
+    #  - '6379:6379'
     command: [ 'redis-server', '--appendonly', 'yes' ]
     volumes:
       - redis:/data
