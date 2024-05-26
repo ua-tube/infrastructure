@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-svc
+  template:
+    metadata:
+      labels:
+        app: users-svc
+    spec:
+      containers:
+      - name: users-svc
+        image: ghcr.io/ua-tube/users:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 15400
+        envFrom:
+        - configMapRef:
+            name: users-svc-secret

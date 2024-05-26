@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-manager-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: video-manager-svc
+  template:
+    metadata:
+      labels:
+        app: video-manager-svc
+    spec:
+      containers:
+      - name: video-manager-svc
+        image: ghcr.io/ua-tube/video-manager:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 15000
+        envFrom:
+        - configMapRef:
+            name: video-manager-svc-secret

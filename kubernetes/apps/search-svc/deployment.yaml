@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search-svc
+  template:
+    metadata:
+      labels:
+        app: search-svc
+    spec:
+      containers:
+      - name: search-svc
+        image: ghcr.io/ua-tube/search:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 15700
+        envFrom:
+        - configMapRef:
+            name: search-svc-secret

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: subscriptions-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: subscriptions-svc
+  template:
+    metadata:
+      labels:
+        app: subscriptions-svc
+    spec:
+      containers:
+      - name: subscriptions-svc
+        image: ghcr.io/ua-tube/subscriptions:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 15800
+        envFrom:
+        - configMapRef:
+            name: subscriptions-svc-secret

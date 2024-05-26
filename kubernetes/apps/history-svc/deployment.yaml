@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: history-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: history-svc
+  template:
+    metadata:
+      labels:
+        app: history-svc
+    spec:
+      containers:
+      - name: history-svc
+        image: ghcr.io/ua-tube/history:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 15900
+        envFrom:
+        - configMapRef:
+            name: history-svc-secret

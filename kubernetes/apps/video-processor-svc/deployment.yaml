@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-processor-svc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: video-processor-svc
+  template:
+    metadata:
+      labels:
+        app: video-processor-svc
+    spec:
+      containers:
+      - name: video-processor-svc
+        image: ghcr.io/ua-tube/video-processor:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 11000
+        envFrom:
+        - configMapRef:
+            name: video-processor-svc-secret
+        volumeMounts:
+          - mountPath: /app/processor_output
+            name: video-processor-svcdata
+      volumes:
+        - name: video-processor-svcdata
+          persistentVolumeClaim:
+            claimName: video-processor-svc-volume-claim

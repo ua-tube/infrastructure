@@ -1,0 +1,653 @@
+version: '3.9'
+services:
+  # ---- APPS SECTION ---- #
+  api-gateway:
+    container_name: ${DOCKER_REGISTRY-}api-gateway
+    image: ghcr.io/ua-tube/api-gateway:latest
+    build:
+      context: ../../api-gateway
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    ports:
+      - '8000:8000'
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 8000
+      CLIENT_URL: http://localhost:3000
+      COMMUNITY_SVC_ORIGIN: http://community-svc:15500
+      HISTORY_SVC_ORIGIN: http://history-svc:15900
+      LIBRARY_SVC_ORIGIN: http://library-svc:15600
+      SEARCH_SVC_ORIGIN: http://search-svc:15700
+      SUBSCRIPTIONS_SVC_ORIGIN: http://subscriptions-svc:15800
+      USERS_SVC_ORIGIN: http://users-svc:15400
+      VIDEO_MANAGER_SVC_ORIGIN: http://video-manager-svc:15000
+      VIDEO_STORE_SVC_ORIGIN: http://video-store-svc:15300
+    depends_on:
+      - community-svc
+      - history-svc
+      - library-svc
+      - search-svc
+      - subscriptions-svc
+      - users-svc
+      - video-manager-svc
+      - video-store-svc
+    networks:
+      - api-gateway
+      - community-svc
+      - history-svc
+      - library-svc
+      - search-svc
+      - subscriptions-svc
+      - users-svc
+      - video-manager-svc
+      - video-store-svc
+      - web-status
+
+  auth-svc:
+    container_name: ${DOCKER_REGISTRY-}auth-svc
+    image: ghcr.io/ua-tube/auth:latest
+    build:
+      context: ../../auth
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    ports:
+      - '9000:9000'
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 9000
+      CLIENT_URL: http://localhost:3000
+      JWT_AT_SECRET: bHkZ7BDCbrvvvaEo1X7EQkDx8dj2mW6yykEmtNb7uThGJ97y9vjfobkClK7ztwEvbJyJV4F3
+      JWT_RT_SECRET: HQJAKZIRWflymsUCaZCZhEpRrucghNQu303hDWpvcISadpxDTvqdXgWTbS8lwgjzePZXDDm9
+      JWT_ISSUER: UaTube.Auth
+      JWT_AUDIENCE: UaTube.Resource
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/auth_db?schema=public
+    depends_on:
+      - postgres
+    networks:
+      - auth-svc
+      - storage-svc
+      - users-svc
+      - subscriptions-svc
+      - history-svc
+      - postgres
+      - video-store-svc
+      - video-manager-svc
+
+  community-svc:
+    container_name: ${DOCKER_REGISTRY-}community-svc
+    image: ghcr.io/ua-tube/community:latest
+    build:
+      context: ../../community
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 15500
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      RABBITMQ_QUEUE: community
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/community_db?schema=public
+    depends_on:
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
+    networks:
+      - community-svc
+      - api-gateway
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
+
+  history-svc:
+    container_name: ${DOCKER_REGISTRY-}history-svc
+    image: ghcr.io/ua-tube/history:latest
+    build:
+      context: ../../history
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 15900
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      RABBITMQ_QUEUE: history
+      MEILISEARCH_URL: http://meilisearch:7700
+      MEILISEARCH_MASTERKEY: UaTubeMaster
+      DATABASE_URL: mongodb://mongo:27017/history
+    depends_on:
+      - auth-svc
+      - redis
+      - postgres
+      - meilisearch
+      - rabbitmq
+    networks:
+      - history-svc
+      - api-gateway
+      - auth-svc
+      - redis
+      - rabbitmq
+      - mongo
+      - meilisearch
+
+  library-svc:
+    container_name: ${DOCKER_REGISTRY-}library-svc
+    image: ghcr.io/ua-tube/library:latest
+    build:
+      context: ../../library
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 15600
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      RABBITMQ_QUEUE: library
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/library_db?schema=public
+    depends_on:
+      - auth-svc
+      - rabbitmq
+      - redis
+      - postgres
+    networks:
+      - library-svc
+      - api-gateway
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
+
+  search-svc:
+    container_name: ${DOCKER_REGISTRY-}search-svc
+    image: ghcr.io/ua-tube/search:latest
+    build:
+      context: ../../search
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 15700
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      RABBITMQ_QUEUE: history
+      MEILISEARCH_URL: http://meilisearch:7700
+      MEILISEARCH_MASTERKEY: UaTubeMaster
+    depends_on:
+      - rabbitmq
+      - meilisearch
+    networks:
+      - search-svc
+      - api-gateway
+      - rabbitmq
+      - meilisearch
+
+  storage-svc:
+    container_name: ${DOCKER_REGISTRY-}storage-svc
+    image: ghcr.io/ua-tube/storage:latest
+    build:
+      context: ../../storage
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    ports:
+      - '10000:10000'
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 10000
+      CLIENT_URL: http://localhost:3000
+      JWT_SECRET: asdh7as0jxm4we0xrm0exmgrt68xom5ext
+      JWT_IMAGE_UT_ISSUER: UaTube.Users
+      JWT_VIDEO_UT_ISSUER: UaTube.VideoManager
+      JWT_AUDIENCE: UaTube.Resource
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      SERVICE_TOKEN: storage_service_token
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/storage_db?schema=public
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      RABBITMQ_VIDEO_PROCESSOR_QUEUE: video-processor
+      RABBITMQ_VIDEO_MANAGER_QUEUE: video-manager
+    depends_on:
+      - auth-svc
+      - postgres
+      - rabbitmq
+    volumes:
+      - storage:/app/public
+    networks:
+      - storage-svc
+      - auth-svc
+      - video-processor-svc
+      - postgres
+      - rabbitmq
+
+  subscriptions-svc:
+    container_name: ${DOCKER_REGISTRY-}subscriptions-svc
+    image: ghcr.io/ua-tube/subscriptions:latest
+    build:
+      context: ../../subscriptions
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 15800
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      RABBITMQ_QUEUE: subscriptions
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/subscriptions_db?schema=public
+    depends_on:
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
+    networks:
+      - subscriptions-svc
+      - api-gateway
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
+
+  users-svc:
+    container_name: ${DOCKER_REGISTRY-}users-svc
+    image: ghcr.io/ua-tube/users:latest
+    build:
+      context: ../../users
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 15400
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      JWT_SECRET: asdh7as0jxm4we0xrm0exmgrt68xom5ext
+      JWT_ISSUER: UaTube.Users
+      JWT_AUDIENCE: UaTube.Resource
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      RABBITMQ_QUEUE: users
+      RABBITMQ_VIDEO_MANAGER_QUEUE: video-manager
+      RABBITMQ_SUBSCRIPTIONS_QUEUE: subscriptions
+      RABBITMQ_LIBRARY_QUEUE: library
+      RABBITMQ_COMMUNITY_QUEUE: community
+      RABBITMQ_VIDEO_STORE_QUEUE: video-store
+      RABBITMQ_HISTORY_QUEUE: history
+      RABBITMQ_SEARCH_QUEUE: search
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/users_db?schema=public
+    depends_on:
+      - auth-svc
+      - rabbitmq
+      - postgres
+    networks:
+      - users-svc
+      - api-gateway
+      - auth-svc
+      - rabbitmq
+      - postgres
+
+  video-manager-svc:
+    container_name: ${DOCKER_REGISTRY-}video-manager-svc
+    image: ghcr.io/ua-tube/video-manager:latest
+    build:
+      context: ../../video-manager
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 15000
+      CLIENT_URL: http://localhost:3000
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      VIDEO_PROCESSOR_SVC_URL: http://video-processor-svc:11000/api/v1/processor/internal
+      VIDEO_PROCESSOR_SERVICE_TOKEN: processor_service_token
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      RABBITMQ_QUEUE: video-manager
+      RABBITMQ_USERS_QUEUE: users
+      RABBITMQ_SEARCH_QUEUE: search
+      RABBITMQ_LIBRARY_QUEUE: library
+      RABBITMQ_HISTORY_QUEUE: history
+      RABBITMQ_COMMUNITY_QUEUE: community
+      RABBITMQ_VIDEO_STORE_QUEUE: video-store
+      JWT_SECRET: asdh7as0jxm4we0xrm0exmgrt68xom5ext
+      JWT_ISSUER: UaTube.VideoManager
+      JWT_AUDIENCE: UaTube.Resource
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/video_manager_db?schema=public
+    depends_on:
+      - auth-svc
+      - video-processor-svc
+      - redis
+      - rabbitmq
+      - postgres
+    networks:
+      - video-manager-svc
+      - api-gateway
+      - auth-svc
+      - video-processor-svc
+      - redis
+      - rabbitmq
+      - postgres
+
+  video-processor-svc:
+    container_name: ${DOCKER_REGISTRY-}video-processor-svc
+    image: ghcr.io/ua-tube/video-processor:latest
+    build:
+      context: ../../video-processor
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 11000
+      SERVICE_TOKEN: processor_service_token
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      RABBITMQ_QUEUE: video-processor
+      RABBITMQ_VIDEO_MANAGER_QUEUE: video-manager
+      STORAGE_BASE_URL: http://storage-svc:10000
+      STORAGE_SERVICE_TOKEN: storage_service_token
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/video_processor_db?schema=public
+      HWACCEL_ENABLED: true
+      GPU_VENDOR: nvidia
+    depends_on:
+      - redis
+      - rabbitmq
+      - storage-svc
+      - postgres
+    volumes:
+      - video-processor:/app/processor_output
+    networks:
+      - video-processor-svc
+      - video-manager-svc
+      - storage-svc
+      - web-status
+      - redis
+      - rabbitmq
+      - postgres
+
+  video-store-svc:
+    container_name: ${DOCKER_REGISTRY-}video-store-svc
+    image: ghcr.io/ua-tube/video-store:latest
+    build:
+      context: ../../video-store
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 15300
+      AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+      RABBITMQ_QUEUE: video-store
+      RABBITMQ_HISTORY_QUEUE: history
+      RABBITMQ_VIDEO_MANAGER_QUEUE: video-manager
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/video_store_db?schema=public
+    depends_on:
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
+    networks:
+      - video-store-svc
+      - api-gateway
+      - web-status
+      - auth-svc
+      - redis
+      - rabbitmq
+      - postgres
+
+  web-status:
+    container_name: ${DOCKER_REGISTRY-}web-status
+    image: ghcr.io/ua-tube/web-status:latest
+    build:
+      context: ../../web-status
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    restart: always
+    ports:
+      - '20000:20000'
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 20000
+      API_GATEWAY: http://api-gateway:8000/api/gateway/health
+      AUTH_SVC_ORIGIN: http://auth-svc:9000/api/v1/health
+      COMMUNITY_SVC_ORIGIN: http://community-svc:15500/api/v1/health
+      HISTORY_SVC_ORIGIN: http://history-svc:15900/api/v1/health
+      LIBRARY_SVC_ORIGIN: http://library-svc:15600/api/v1/health
+      SEARCH_SVC_ORIGIN: http://search-svc:15700/api/v1/health
+      STORAGE_SVC_ORIGIN: http://storage-svc:10000/api/v1/health
+      SUBSCRIPTIONS_SVC_ORIGIN: http://subscriptions-svc:15800/api/v1/health
+      USERS_SVC_ORIGIN: http://users-svc:15400/api/v1/health
+      VIDEO_MANAGER_SVC_ORIGIN: http://video-manager-svc:15000/api/v1/health
+      VIDEO_PROCESSOR_SVC_ORIGIN: http://video-processor-svc:11000/api/v1/health
+      VIDEO_STORE_SVC_ORIGIN: http://video-store-svc:15300/api/v1/health
+    depends_on:
+      - api-gateway
+      - auth-svc
+      - community-svc
+      - history-svc
+      - library-svc
+      - search-svc
+      - storage-svc
+      - subscriptions-svc
+      - users-svc
+      - video-manager-svc
+      - video-processor-svc
+      - video-store-svc
+    networks:
+      - web-status
+      - api-gateway
+      - auth-svc
+      - community-svc
+      - history-svc
+      - library-svc
+      - search-svc
+      - storage-svc
+      - subscriptions-svc
+      - users-svc
+      - video-manager-svc
+      - video-processor-svc
+      - video-store-svc
+
+  # ---- SERVICES SECTION ---- #
+  postgres:
+    container_name: ${DOCKER_REGISTRY-}postgres
+    image: postgres:16.2-alpine
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DATA: /var/data
+    volumes:
+      - postgres:/var/data
+    networks:
+      - postgres
+      - auth-svc
+      - storage-svc
+      - subscriptions-svc
+      - users-svc
+      - library-svc
+      - video-store-svc
+      - video-processor-svc
+      - video-manager-svc
+      - community-svc
+
+  pgadmin:
+    container_name: ${DOCKER_REGISTRY-}pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - '5050:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin:/root/.pgadmin
+    networks:
+      - postgres
+
+  rabbitmq:
+    container_name: ${DOCKER_REGISTRY-}rabbitmq
+    image: rabbitmq:3.13.0-management-alpine
+    restart: always
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: root
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    networks:
+      - rabbitmq
+      - storage-svc
+      - subscriptions-svc
+      - users-svc
+      - history-svc
+      - library-svc
+      - search-svc
+      - video-store-svc
+      - video-processor-svc
+      - video-manager-svc
+      - community-svc
+
+  mongo:
+    container_name: ${DOCKER_REGISTRY-}mongo
+    image: mongo:7.0.9
+    restart: always
+    ports:
+      - '27017:27017'
+    healthcheck:
+      test: [ 'CMD', 'mongosh', '--eval', 'rs.initiate()' ]
+      interval: 10s
+    volumes:
+      - mongo:/data/db
+    networks:
+      - mongo
+      - history-svc
+
+  meilisearch:
+    container_name: ${DOCKER_REGISTRY-}meilisearch
+    image: getmeili/meilisearch:v1.8
+    restart: always
+    ports:
+      - '7700:7700'
+    environment:
+      - http_proxy
+      - https_proxy
+      - MEILI_MASTER_KEY=UaTubeMaster
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_ENV=development
+      - MEILI_LOG_LEVEL
+      - MEILI_DB_PATH=/data.ms
+    volumes:
+      - 'meilisearch:/data.ms'
+    networks:
+      - meilisearch
+      - history-svc
+      - search-svc
+
+  redis:
+    container_name: ${DOCKER_REGISTRY-}redis
+    image: redis:6.2.14-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: [ 'redis-server', '--appendonly', 'yes' ]
+    volumes:
+      - redis:/data
+    networks:
+      - redis
+      - subscriptions-svc
+      - video-processor-svc
+      - history-svc
+      - library-svc
+      - video-store-svc
+      - video-manager-svc
+      - community-svc
+
+# --- VOLUMES ---- #
+volumes:
+  postgres:
+  pgadmin:
+  rabbitmq:
+  mongo:
+  meilisearch:
+  redis:
+  storage:
+  video-processor:
+
+# ---- NETWORKS ---- #
+networks:
+  api-gateway:
+    driver: bridge
+  auth-svc:
+    driver: bridge
+  community-svc:
+    driver: bridge
+  history-svc:
+    driver: bridge
+  library-svc:
+    driver: bridge
+  search-svc:
+    driver: bridge
+  storage-svc:
+    driver: bridge
+  subscriptions-svc:
+    driver: bridge
+  users-svc:
+    driver: bridge
+  video-manager-svc:
+    driver: bridge
+  video-processor-svc:
+    driver: bridge
+  video-store-svc:
+    driver: bridge
+  web-status:
+    driver: bridge
+  postgres:
+    driver: bridge
+  mongo:
+    driver: bridge
+  meilisearch:
+    driver: bridge
+  rabbitmq:
+    driver: bridge
+  redis:
+    driver: bridge

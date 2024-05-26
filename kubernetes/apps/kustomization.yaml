@@ -1,0 +1,14 @@
+resources:
+  - ./api-gateway
+  - ./auth-svc
+  - ./community-svc
+  - ./history-svc
+  - ./library-svc
+  - ./search-svc
+  - ./storage-svc
+  - ./subscriptions-svc
+  - ./users-svc
+  - ./video-manager-svc
+  - ./video-processor-svc
+  - ./video-store-svc
+  - ./web-status

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-store-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: video-store-svc
+  template:
+    metadata:
+      labels:
+        app: video-store-svc
+    spec:
+      containers:
+      - name: video-store-svc
+        image: ghcr.io/ua-tube/video-store:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 15300
+        envFrom:
+        - configMapRef:
+            name: video-store-svc-secret

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: history-svc-secret
+  labels:
+    app: history-svc
+data:
+  HTTP_HOST: '0.0.0.0'
+  HTTP_PORT: '15900'
+  AUTH_SVC_URL: 'http://auth-svc:9000/api/v1/auth/internal'
+  REDIS_URL: 'redis://redis:6379'
+  RABBITMQ_URL: 'amqp://root:root@rabbitmq:5672'
+  RABBITMQ_QUEUE: 'history'
+  MEILISEARCH_URL: 'http://meilisearch:7700'
+  MEILISEARCH_MASTERKEY: 'UaTubeMaster'
+  DATABASE_URL: 'mongodb://mongodb:27017/history'

@@ -1,0 +1,7 @@
+resources:
+  - ./meilisearch
+  - ./mongodb
+  - ./pgadmin
+  - ./postgres
+  - ./rabbitmq
+  - ./redis

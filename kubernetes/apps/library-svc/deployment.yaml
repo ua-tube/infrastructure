@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: library-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: library-svc
+  template:
+    metadata:
+      labels:
+        app: library-svc
+    spec:
+      containers:
+      - name: library-svc
+        image: ghcr.io/ua-tube/library:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 15600
+        envFrom:
+        - configMapRef:
+            name: library-svc-secret

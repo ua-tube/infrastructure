@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: video-processor-svc-secret
+  labels:
+    app: video-processor-svc
+data:
+  HTTP_HOST: '0.0.0.0'
+  HTTP_PORT: '11000'
+  SERVICE_TOKEN: 'processor_service_token'
+  REDIS_URL: 'redis://redis:6379'
+  RABBITMQ_URL: 'amqp://root:root@rabbitmq:5672'
+  RABBITMQ_QUEUE: 'video-processor'
+  RABBITMQ_VIDEO_MANAGER_QUEUE: 'video-manager'
+  STORAGE_BASE_URL: 'http://storage:10000'
+  STORAGE_SERVICE_TOKEN: 'storage_service_token'
+  DATABASE_URL: 'postgresql://postgres:postgres@postgres:5432/video_processor_db?schema=public'
+  HWACCEL_ENABLED: 'true'
+  GPU_VENDOR: 'nvidia'

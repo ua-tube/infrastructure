@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: community-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: community-svc
+  template:
+    metadata:
+      labels:
+        app: community-svc
+    spec:
+      containers:
+      - name: community-svc
+        image: ghcr.io/ua-tube/community:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 15500
+        envFrom:
+        - configMapRef:
+            name: community-svc-secret

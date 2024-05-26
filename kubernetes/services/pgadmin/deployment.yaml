@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5050
+              hostPort: 80
+          envFrom:
+            - configMapRef:
+                name: pgadmin-secret
+          volumeMounts:
+            - mountPath: /var/data
+              name: pgadmindata
+      volumes:
+        - name: pgadmindata
+          persistentVolumeClaim:
+            claimName: pgadmin-volume-claim
