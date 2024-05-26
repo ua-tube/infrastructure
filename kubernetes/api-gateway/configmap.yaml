@@ -7,12 +7,12 @@ metadata:
 data:
   HTTP_HOST: '0.0.0.0'
   HTTP_PORT: '8000'
-  CLIENT_URL: http://localhost:3000
-  COMMUNITY_SVC_ORIGIN: http://community-svc:15500
-  HISTORY_SVC_ORIGIN: http://history-svc:15900
-  LIBRARY_SVC_ORIGIN: http://library-svc:15600
-  SEARCH_SVC_ORIGIN: http://search-svc:15700
-  SUBSCRIPTIONS_SVC_ORIGIN: http://subscriptions-svc:15800
-  USERS_SVC_ORIGIN: http://users-svc:15400
-  VIDEO_MANAGER_SVC_ORIGIN: http://video-manager-svc:15000
-  VIDEO_STORE_SVC_ORIGIN: http://video-store-svc:15300
+  CLIENT_URL: 'http://localhost:3000'
+  COMMUNITY_SVC_ORIGIN: 'http://community-svc:15500'
+  HISTORY_SVC_ORIGIN: 'http://history-svc:15900'
+  LIBRARY_SVC_ORIGIN: 'http://library-svc:15600'
+  SEARCH_SVC_ORIGIN: 'http://search-svc:15700'
+  SUBSCRIPTIONS_SVC_ORIGIN: 'http://subscriptions-svc:15800'
+  USERS_SVC_ORIGIN: 'http://users-svc:15400'
+  VIDEO_MANAGER_SVC_ORIGIN: 'http://video-manager-svc:15000'
+  VIDEO_STORE_SVC_ORIGIN: 'http://video-store-svc:15300'

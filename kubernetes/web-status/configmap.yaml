@@ -7,15 +7,15 @@ metadata:
 data:
   HTTP_HOST: '0.0.0.0'
   HTTP_PORT: '20000'
-  API_GATEWAY: http://api-gateway:8000/api/gateway/health
-  AUTH_SVC_ORIGIN: http://auth-svc:9000/api/v1/health
-  COMMUNITY_SVC_ORIGIN: http://community-svc:15500/api/v1/health
-  HISTORY_SVC_ORIGIN: http://history-svc:15900/api/v1/health
-  LIBRARY_SVC_ORIGIN: http://library-svc:15600/api/v1/health
-  SEARCH_SVC_ORIGIN: http://search-svc:15700/api/v1/health
-  STORAGE_SVC_ORIGIN: http://storage-svc:10000/api/v1/health
-  SUBSCRIPTIONS_SVC_ORIGIN: http://subscriptions-svc:15800/api/v1/health
-  USERS_SVC_ORIGIN: http://users-svc:15400/api/v1/health
-  VIDEO_MANAGER_SVC_ORIGIN: http://video-manager-svc:15000/api/v1/health
-  VIDEO_PROCESSOR_SVC_ORIGIN: http://video-processor-svc:11000/api/v1/health
-  VIDEO_STORE_SVC_ORIGIN: http://video-store-svc:15300/api/v1/health
+  API_GATEWAY: 'http://api-gateway:8000/api/gateway/health'
+  AUTH_SVC_ORIGIN: 'http://auth-svc:9000/api/v1/health'
+  COMMUNITY_SVC_ORIGIN: 'http://community-svc:15500/api/v1/health'
+  HISTORY_SVC_ORIGIN: 'http://history-svc:15900/api/v1/health'
+  LIBRARY_SVC_ORIGIN: 'http://library-svc:15600/api/v1/health'
+  SEARCH_SVC_ORIGIN: 'http://search-svc:15700/api/v1/health'
+  STORAGE_SVC_ORIGIN: 'http://storage-svc:10000/api/v1/health'
+  SUBSCRIPTIONS_SVC_ORIGIN: 'http://subscriptions-svc:15800/api/v1/health'
+  USERS_SVC_ORIGIN: 'http://users-svc:15400/api/v1/health'
+  VIDEO_MANAGER_SVC_ORIGIN: 'http://video-manager-svc:15000/api/v1/health'
+  VIDEO_PROCESSOR_SVC_ORIGIN: 'http://video-processor-svc:11000/api/v1/health'
+  VIDEO_STORE_SVC_ORIGIN: 'http://video-store-svc:15300/api/v1/health'

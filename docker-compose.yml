@@ -485,8 +485,8 @@ services:
     container_name: ${DOCKER_REGISTRY-}postgres
     image: postgres:16.2-alpine
     restart: always
-    #ports:
-    #  - '5432:5432'
+    ports:
+      - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -523,9 +523,9 @@ services:
     container_name: ${DOCKER_REGISTRY-}rabbitmq
     image: rabbitmq:3.13.0-management-alpine
     restart: always
-    #ports:
-    #  - '5672:5672'
-    #  - '15672:15672'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
     environment:
       RABBITMQ_DEFAULT_USER: root
       RABBITMQ_DEFAULT_PASS: root
@@ -548,8 +548,8 @@ services:
     container_name: ${DOCKER_REGISTRY-}mongo
     image: mongo:7.0.9
     restart: always
-    #ports:
-    #  - '27017:27017'
+    ports:
+      - '27017:27017'
     healthcheck:
       test: [ 'CMD', 'mongosh', '--eval', 'rs.initiate()' ]
       interval: 10s
@@ -563,8 +563,8 @@ services:
     container_name: ${DOCKER_REGISTRY-}meilisearch
     image: getmeili/meilisearch:v1.8
     restart: always
-    #ports:
-    #  - '7700:7700'
+    ports:
+      - '7700:7700'
     environment:
       - http_proxy
       - https_proxy
@@ -584,8 +584,8 @@ services:
     container_name: ${DOCKER_REGISTRY-}redis
     image: redis:6.2.14-alpine
     restart: always
-    #ports:
-    #  - '6379:6379'
+    ports:
+      - '6379:6379'
     command: [ 'redis-server', '--appendonly', 'yes' ]
     volumes:
       - redis:/data

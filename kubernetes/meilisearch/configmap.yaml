@@ -5,7 +5,7 @@ metadata:
   labels:
     app: meilisearch
 data:
-  MEILI_MASTER_KEY: "UaTubeMaster"
-  MEILI_NO_ANALYTICS: "true"
-  MEILI_ENV: "development"
-  MEILI_DB_PATH: "/data.ms"
+  MEILI_MASTER_KEY: 'UaTubeMaster'
+  MEILI_NO_ANALYTICS: 'true'
+  MEILI_ENV: 'development'
+  MEILI_DB_PATH: '/data.ms'

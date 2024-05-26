@@ -1,0 +1,10 @@
+resources:
+  - ./api-gateway
+  - ./auth-svc
+  - ./meilisearch
+  - ./mongodb
+  - ./postgres
+  - ./rabbitmq
+  - ./redis
+  - ./users-svc
+  - ./web-status

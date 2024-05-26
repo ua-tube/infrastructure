@@ -15,7 +15,7 @@ spec:
       containers:
       - name: web-status
         image: ghcr.io/ua-tube/web-status:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 20000
         envFrom:
@@ -23,8 +23,8 @@ spec:
             name: web-status-secret
         resources:
           requests:
-            cpu: "100m"
-            memory: "256Mi"
-          limits:
             cpu: "500m"
             memory: "512Mi"
+          limits:
+            cpu: "2000m"
+            memory: "2Gi"
