@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:6.2.14-alpine
+        imagePullPolicy: IfNotPresent
+        command: ["redis-server", "--appendonly", "yes"]
+        ports:
+        - containerPort: 6379
+        envFrom:
+        - configMapRef:
+            name: redis-secret
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "2Gi"
+          limits:
+            cpu: "1000m"
+            memory: "5Gi"
+        volumeMounts:
+        - mountPath: /data
+          name: redisdata
+      volumes:
+      - name: redisdata
+        persistentVolumeClaim:
+          claimName: redis-volume-claim

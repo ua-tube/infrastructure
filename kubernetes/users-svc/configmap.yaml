@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: users-svc-secret
+  labels:
+    app: users-svc
+data:
+  HTTP_HOST: '0.0.0.0'
+  HTTP_PORT: '15400'
+  AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
+  JWT_SECRET: asdh7as0jxm4we0xrm0exmgrt68xom5ext
+  JWT_ISSUER: UaTube.Users
+  JWT_AUDIENCE: UaTube.Resource
+  RABBITMQ_URL: amqp://root:root@rabbitmq:5672
+  RABBITMQ_QUEUE: users
+  RABBITMQ_VIDEO_MANAGER_QUEUE: video-manager
+  RABBITMQ_SUBSCRIPTIONS_QUEUE: subscriptions
+  RABBITMQ_LIBRARY_QUEUE: library
+  RABBITMQ_COMMUNITY_QUEUE: community
+  RABBITMQ_VIDEO_STORE_QUEUE: video-store
+  RABBITMQ_HISTORY_QUEUE: history
+  RABBITMQ_SEARCH_QUEUE: search
+  DATABASE_URL: postgresql://postgres:postgres@postgres:5432/users_db?schema=public

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-status
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-status
+  template:
+    metadata:
+      labels:
+        app: web-status
+    spec:
+      containers:
+      - name: web-status
+        image: ghcr.io/ua-tube/web-status:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 20000
+        envFrom:
+        - configMapRef:
+            name: web-status-secret
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"

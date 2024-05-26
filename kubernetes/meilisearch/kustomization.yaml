@@ -1,0 +1,6 @@
+resources:
+- configmap.yaml
+- pv.yaml
+- claim.yaml
+- deployment.yaml
+- service.yaml
