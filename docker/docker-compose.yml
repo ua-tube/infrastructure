@@ -10,6 +10,11 @@ services:
     restart: always
     ports:
       - '8000:8000'
+    healthcheck:
+      test: 'http://127.0.0.1:8000/api/gateway/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 8000
@@ -52,6 +57,11 @@ services:
     restart: always
     ports:
       - '9000:9000'
+    healthcheck:
+      test: 'http://127.0.0.1:9000/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 9000
@@ -80,6 +90,11 @@ services:
       context: ../../community
       dockerfile: Dockerfile
     restart: always
+    healthcheck:
+      test: 'http://127.0.0.1:15500/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15500
@@ -109,6 +124,11 @@ services:
       context: ../../history
       dockerfile: Dockerfile
     restart: always
+    healthcheck:
+      test: 'http://127.0.0.1:15900/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15900
@@ -142,6 +162,11 @@ services:
       context: ../../library
       dockerfile: Dockerfile
     restart: always
+    healthcheck:
+      test: 'http://127.0.0.1:15600/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15600
@@ -171,6 +196,11 @@ services:
       context: ../../search
       dockerfile: Dockerfile
     restart: always
+    healthcheck:
+      test: 'http://127.0.0.1:15700/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15700
@@ -195,6 +225,11 @@ services:
       context: ../../storage
       dockerfile: Dockerfile
     restart: always
+    healthcheck:
+      test: 'http://127.0.0.1:10000/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     ports:
       - '10000:10000'
     environment:
@@ -231,6 +266,11 @@ services:
       context: ../../subscriptions
       dockerfile: Dockerfile
     restart: always
+    healthcheck:
+      test: 'http://127.0.0.1:15800/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15800
@@ -260,6 +300,11 @@ services:
       context: ../../users
       dockerfile: Dockerfile
     restart: always
+    healthcheck:
+      test: 'http://127.0.0.1:15400/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15400
@@ -296,6 +341,11 @@ services:
       context: ../../video-manager
       dockerfile: Dockerfile
     restart: always
+    healthcheck:
+      test: 'http://127.0.0.1:15000/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15000
@@ -338,6 +388,11 @@ services:
       context: ../../video-processor
       dockerfile: Dockerfile
     restart: always
+    healthcheck:
+      test: 'http://127.0.0.1:11000/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 11000
@@ -375,6 +430,11 @@ services:
       context: ../../video-store
       dockerfile: Dockerfile
     restart: always
+    healthcheck:
+      test: 'http://127.0.0.1:15300/api/v1/health'
+      interval: 15s
+      timeout: 5s
+      retries: 3
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15300
@@ -570,6 +630,15 @@ services:
       - video-store-svc
       - video-manager-svc
       - community-svc
+
+  autoheal:
+    container_name: autoheal
+    restart: always
+    image: willfarrell/autoheal
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 # --- VOLUMES ---- #
 volumes:
