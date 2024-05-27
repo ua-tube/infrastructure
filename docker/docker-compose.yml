@@ -7,9 +7,6 @@ services:
     build:
       context: ../../api-gateway
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     ports:
       - '8000:8000'
@@ -52,9 +49,6 @@ services:
     build:
       context: ../../auth
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     ports:
       - '9000:9000'
@@ -85,13 +79,11 @@ services:
     build:
       context: ../../community
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15500
+      CLIENT_URL: http://localhost:3000
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
@@ -116,13 +108,11 @@ services:
     build:
       context: ../../history
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15900
+      CLIENT_URL: http://localhost:3000
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
@@ -151,13 +141,11 @@ services:
     build:
       context: ../../library
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15600
+      CLIENT_URL: http://localhost:3000
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
@@ -182,13 +170,11 @@ services:
     build:
       context: ../../search
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15700
+      CLIENT_URL: http://localhost:3000
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
       RABBITMQ_QUEUE: history
       MEILISEARCH_URL: http://meilisearch:7700
@@ -208,9 +194,6 @@ services:
     build:
       context: ../../storage
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     ports:
       - '10000:10000'
@@ -247,13 +230,11 @@ services:
     build:
       context: ../../subscriptions
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15800
+      CLIENT_URL: http://localhost:3000
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
@@ -278,13 +259,11 @@ services:
     build:
       context: ../../users
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15400
+      CLIENT_URL: http://localhost:3000
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
       JWT_SECRET: asdh7as0jxm4we0xrm0exmgrt68xom5ext
       JWT_ISSUER: UaTube.Users
@@ -316,9 +295,6 @@ services:
     build:
       context: ../../video-manager
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
@@ -361,13 +337,11 @@ services:
     build:
       context: ../../video-processor
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 11000
+      CLIENT_URL: http://localhost:3000
       SERVICE_TOKEN: processor_service_token
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
@@ -400,13 +374,11 @@ services:
     build:
       context: ../../video-store
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     environment:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 15300
+      CLIENT_URL: http://localhost:3000
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
@@ -434,9 +406,6 @@ services:
     build:
       context: ../../web-status
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     restart: always
     ports:
       - '20000:20000'
