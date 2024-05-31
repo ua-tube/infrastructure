@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   # ---- APPS SECTION ---- #
   api-gateway:
@@ -206,7 +205,7 @@ services:
       HTTP_PORT: 15700
       CLIENT_URL: http://localhost:3000
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
-      RABBITMQ_QUEUE: history
+      RABBITMQ_QUEUE: search
       MEILISEARCH_URL: http://meilisearch:7700
       MEILISEARCH_MASTERKEY: UaTubeMaster
     depends_on:
@@ -233,6 +232,7 @@ services:
     ports:
       - '10000:10000'
     environment:
+      NODE_ENV: development
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 10000
       CLIENT_URL: http://localhost:3000
@@ -351,8 +351,6 @@ services:
       HTTP_PORT: 15000
       CLIENT_URL: http://localhost:3000
       AUTH_SVC_URL: http://auth-svc:9000/api/v1/auth/internal
-      VIDEO_PROCESSOR_SVC_URL: http://video-processor-svc:11000/api/v1/processor/internal
-      VIDEO_PROCESSOR_SERVICE_TOKEN: processor_service_token
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
       RABBITMQ_QUEUE: video-manager
@@ -362,13 +360,13 @@ services:
       RABBITMQ_HISTORY_QUEUE: history
       RABBITMQ_COMMUNITY_QUEUE: community
       RABBITMQ_VIDEO_STORE_QUEUE: video-store
+      RABBITMQ_VIDEO_PROCESSOR_QUEUE: video-processor
       JWT_SECRET: asdh7as0jxm4we0xrm0exmgrt68xom5ext
       JWT_ISSUER: UaTube.VideoManager
       JWT_AUDIENCE: UaTube.Resource
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/video_manager_db?schema=public
     depends_on:
       - auth-svc
-      - video-processor-svc
       - redis
       - rabbitmq
       - postgres
@@ -376,7 +374,6 @@ services:
       - video-manager-svc
       - api-gateway
       - auth-svc
-      - video-processor-svc
       - redis
       - rabbitmq
       - postgres
@@ -397,7 +394,6 @@ services:
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: 11000
       CLIENT_URL: http://localhost:3000
-      SERVICE_TOKEN: processor_service_token
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
       RABBITMQ_QUEUE: video-processor
@@ -416,7 +412,6 @@ services:
       - video-processor:/app/processor_output
     networks:
       - video-processor-svc
-      - video-manager-svc
       - storage-svc
       - web-status
       - redis
