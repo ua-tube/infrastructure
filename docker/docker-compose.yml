@@ -102,6 +102,8 @@ services:
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://root:root@rabbitmq:5672
       RABBITMQ_QUEUE: community
+      RABBITMQ_SUBSCRIPTIONS_QUEUE: subscriptions
+      RABBITMQ_VIDEO_MANAGER_QUEUE: video-processor
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/community_db?schema=public
     depends_on:
       - auth-svc
@@ -515,7 +517,7 @@ services:
     ports:
       - '5432:5432'
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready", "-d", "postgres" ]
+      test: ['CMD-SHELL', 'pg_isready', '-d', 'postgres']
       interval: 15s
       timeout: 5s
       retries: 3
@@ -630,9 +632,9 @@ services:
     restart: always
     ports:
       - '6379:6379'
-    command: [ 'redis-server', '--appendonly', 'yes' ]
+    command: ['redis-server', '--appendonly', 'yes']
     healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
       interval: 15s
       timeout: 5s
       retries: 3
