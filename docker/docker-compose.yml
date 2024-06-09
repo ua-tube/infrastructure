@@ -1,5 +1,28 @@
 services:
   # ---- APPS SECTION ---- #
+  web-spa:
+    container_name: ${DOCKER_REGISTRY-}web-spa
+    image: ghcr.io/ua-tube/web-spa:latest
+    build:
+      context: ../../web
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      FRONTEND_URL: http://localhost:3000
+      GATEWAY_SERVER_URL: http://localhost:8000/api
+      AUTH_SERVER_URL: http://localhost:9000/api/v1
+      STORAGE_SERVER_URL: http://localhost:10000
+      STORAGE_SERVER_API_URL: http://localhost:10000/api/v1
+    depends_on:
+      - api-gateway
+    networks:
+      - web-spa
+      - api-gateway
+      - auth-svc
+      - storage-svc
+
   api-gateway:
     container_name: ${DOCKER_REGISTRY-}api-gateway
     image: ghcr.io/ua-tube/api-gateway:latest
@@ -37,6 +60,7 @@ services:
       - video-store-svc
     networks:
       - api-gateway
+      - web-spa
       - community-svc
       - history-svc
       - library-svc
@@ -74,6 +98,7 @@ services:
       - postgres
     networks:
       - auth-svc
+      - web-spa
       - storage-svc
       - users-svc
       - subscriptions-svc
@@ -256,6 +281,7 @@ services:
       - storage:/app/public
     networks:
       - storage-svc
+      - web-spa
       - auth-svc
       - video-processor-svc
       - postgres
@@ -672,6 +698,8 @@ volumes:
 
 # ---- NETWORKS ---- #
 networks:
+  web-spa:
+    driver: bridge
   api-gateway:
     driver: bridge
   auth-svc:
